@@ -11,8 +11,6 @@ const useAssets = (path) => {
     if (name.includes("visual")) {
       visuals.push(mesh);
     } else if (name.includes("collider")) {
-      // Add the args property to the mesh
-      mesh.args = [1, 1, 1]; // Replace with the actual dimensions
       colliders.push(mesh);
     } else if (name.includes("player")) {
       players.push(mesh);

@@ -1,12 +1,9 @@
 /* eslint-disable react/no-unknown-property */
 import PropTypes from "prop-types";
-import { forwardRef } from "react";
-import { RigidBody, TrimeshCollider } from "@react-three/rapier";
+import { RigidBody } from "@react-three/rapier";
 
-const World = forwardRef(({ visuals }) => {
-  // Initialize physics...
-
-  // Initialize visuals
+const World = ({ visuals }) => {
+  // Add shadows to the visuals
   visuals.forEach((mesh) => {
     mesh.receiveShadow = true;
     mesh.castShadow = true;
@@ -18,10 +15,10 @@ const World = forwardRef(({ visuals }) => {
       <primitive object={mesh} />
     </RigidBody>
   ));
-});
+};
 
+// propTypes to validate the props passed to the World component
 World.displayName = "World";
-
 World.propTypes = {
   visuals: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
