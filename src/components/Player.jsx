@@ -2,9 +2,7 @@
 /* eslint-disable react/no-unknown-property */
 import PropTypes from "prop-types";
 import { RigidBody } from "@react-three/rapier";
-import { useEffect, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
-import { useThree } from "@react-three/fiber";
+import { useRef } from "react";
 import Controller from "./Controller";
 
 const Player = ({ mesh }) => {

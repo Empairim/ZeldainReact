@@ -1,5 +1,7 @@
+/* eslint-disable react/prop-types */
 import { useThree, useFrame } from "@react-three/fiber";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import * as THREE from "three";
 
 const Controller = ({ playerRef }) => {
   const { camera } = useThree();
@@ -12,7 +14,7 @@ const Controller = ({ playerRef }) => {
 
   const MOVEMENT_SPEED = 0.1;
   const MAX_VEL = 1.75;
-
+  //Camera follows the player
   useFrame(() => {
     if (!playerRef.current) return;
 
@@ -21,14 +23,21 @@ const Controller = ({ playerRef }) => {
 
     camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
     camera.position.y +=
-      (targetPosition.y + 3 - camera.position.y) * lerpFactor;
+      (targetPosition.y + 5.4 - camera.position.y) * lerpFactor;
     camera.position.z +=
-      (targetPosition.z + 10 - camera.position.z) * lerpFactor;
+      (targetPosition.z + 9 - camera.position.z) * lerpFactor;
+    // Create a quaternion representing the rotation from the camera to the target position
+    const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().lookAt(camera.position, targetPosition, camera.up)
+    );
+
+    // Interpolate the camera's quaternion towards the target quaternion
+    camera.quaternion.slerp(targetQuaternion, lerpFactor);
 
     const impulse = { x: 0, y: 0, z: 0 };
     const linvel = playerRef.current.linvel();
     let changeRotation = false;
-
+    //Player movement
     if (keysPressed.ArrowRight && linvel.x < MAX_VEL) {
       impulse.x += MOVEMENT_SPEED;
       changeRotation = true;
@@ -54,7 +63,7 @@ const Controller = ({ playerRef }) => {
       }
     }
   });
-
+  //Key press event
   useEffect(() => {
     const handleKeyDown = (event) => {
       setKeysPressed((keys) => ({ ...keys, [event.key]: true }));

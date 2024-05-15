@@ -25,7 +25,9 @@ const App = () => {
           shadow-camera-bottom={-10}
           shadow-camera-near={0.5}
           shadow-camera-far={50}
-          shadow-mapSize-width={1024}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-bias={-0.0001} // reduces self-shadowing
         />
         <Suspense
           fallback={
