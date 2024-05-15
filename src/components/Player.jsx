@@ -1,7 +1,11 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/no-unknown-property */
 import PropTypes from "prop-types";
-import { RigidBody, RapierRigidBody } from "@react-three/rapier";
-import { useEffect, useRef } from "react";
+import { RigidBody } from "@react-three/rapier";
+import { useEffect, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
+import Controller from "./Controller";
 
 const Player = ({ mesh }) => {
   if (!mesh || !mesh.position) {
@@ -9,46 +13,23 @@ const Player = ({ mesh }) => {
     return null;
   }
   const rigidBody = useRef();
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (rigidBody.current) {
-        switch (event.key) {
-          case "w":
-            // forward
-            rigidBody.current.setLinvel({ x: 0, y: 0, z: 1 }, true);
-            break;
-          case "a":
-            // left
-            rigidBody.current.setLinvel({ x: -1, y: 0, z: 0 }, true);
-            break;
-          case "s":
-            // backward
-            rigidBody.current.setLinvel({ x: 0, y: 0, z: -1 }, true);
-            break;
-          case "d":
-            // right
-            rigidBody.current.setLinvel({ x: 1, y: 0, z: 0 }, true);
-            break;
-          default:
-            break;
-        }
-      }
-    };
 
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-  console.log(rigidBody);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
 
   // Add the mesh to the player
   return (
     <>
-      <RigidBody ref={rigidBody} type="DYNAMIC" position={[0, 10, 0]}>
+      <Controller playerRef={rigidBody} />
+      <RigidBody
+        ref={rigidBody}
+        type="DYNAMIC"
+        position={[0, 10, 0]}
+        colliders={"hull"}
+        friction={3}
+        linearDamping={0.5}
+        fixedRotations={[true, true, true]}
+      >
         <primitive object={mesh} />
       </RigidBody>
     </>
