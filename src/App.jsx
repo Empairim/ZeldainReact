@@ -13,9 +13,20 @@ const App = () => {
 
   return (
     <div id="game">
-      <Canvas>
+      <Canvas shadows>
         <ambientLight intensity={0.9} />
-        <directionalLight color="white" position={[0, 5, 5]} />
+        <directionalLight
+          position={[0, 5, 0]}
+          intensity={1.5}
+          castShadow
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
+          shadow-camera-near={0.5}
+          shadow-camera-far={50}
+          shadow-mapSize-width={1024}
+        />
         <Suspense
           fallback={
             <mesh position={[0, 0, 0]}>
