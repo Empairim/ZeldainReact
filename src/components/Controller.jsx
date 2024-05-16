@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useThree, useFrame } from "@react-three/fiber";
+import { useThree, useFrame, extend } from "@react-three/fiber";
 import { useState, useEffect } from "react";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
 import * as THREE from "three";
+
+extend({ OrbitControls });
 
 const Controller = ({ playerRef }) => {
   const { camera } = useThree();
@@ -20,7 +24,7 @@ const Controller = ({ playerRef }) => {
 
     const targetPosition = playerRef.current.translation();
     const lerpFactor = 0.01;
-
+    // Interpolate the camera's position towards the target position
     camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
     camera.position.y +=
       (targetPosition.y + 5.4 - camera.position.y) * lerpFactor;

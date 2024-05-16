@@ -2,14 +2,14 @@
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
-import { Text } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
-import useAssets from "./components/UseAssets";
-import Player from "./components/Player";
+import UseWorldAssets from "./components/UseWorldAssets";
 import World from "./components/World";
+import Player from "./components/Player";
 
 const App = () => {
-  const { visuals, colliders, players } = useAssets("/glb/world0.glb");
+  const { visuals, colliders } = UseWorldAssets("/glb/world0.glb");
 
   return (
     <div id="game">
@@ -32,15 +32,16 @@ const App = () => {
         <Suspense
           fallback={
             <mesh position={[0, 0, 0]}>
-              <Text color="black">Loading...</Text>
+              <Text color="red">Loading...</Text>
             </mesh>
           }
         >
           <Physics debug>
             <World visuals={visuals} colliders={colliders} />
-            <Player mesh={players[0]} />
+            <Player />
           </Physics>
         </Suspense>
+        <OrbitControls enablePan={false} enableRotate={false} />
       </Canvas>
     </div>
   );

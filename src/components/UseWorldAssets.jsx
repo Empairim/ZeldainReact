@@ -1,10 +1,9 @@
 import { useGLTF } from "@react-three/drei";
 
-const useAssets = (path) => {
+const UseWorldAssets = (path) => {
   const glb = useGLTF(path);
   const visuals = [];
   const colliders = [];
-  const players = [];
 
   glb.scene.traverse((mesh) => {
     const name = mesh.name;
@@ -12,12 +11,10 @@ const useAssets = (path) => {
       visuals.push(mesh);
     } else if (name.includes("collider")) {
       colliders.push(mesh);
-    } else if (name.includes("player")) {
-      players.push(mesh);
     }
   });
 
-  return { visuals, colliders, players };
+  return { visuals, colliders };
 };
 
-export default useAssets;
+export default UseWorldAssets;
