@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useThree, useFrame, extend } from "@react-three/fiber";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
+import { useGLTF, useAnimations } from "@react-three/drei"; // Import useGLTF and useAnimations hooks
 import * as THREE from "three";
+import { Model } from "./Char";
 
 extend({ OrbitControls });
 
@@ -14,10 +15,15 @@ const Controller = ({ playerRef }) => {
     ArrowLeft: false,
     ArrowUp: false,
     ArrowDown: false,
+    Space: false, // Add Space key
   });
 
+  const { animations } = useGLTF("/glb/character.glb"); // Load GLB animations
+  const actionsRef = useRef();
   const MOVEMENT_SPEED = 0.1;
   const MAX_VEL = 1.75;
+  let currentAction = null;
+
   //Camera follows the player
   useFrame(() => {
     if (!playerRef.current) return;
@@ -42,9 +48,27 @@ const Controller = ({ playerRef }) => {
     const linvel = playerRef.current.linvel();
     let changeRotation = false;
     //Player movement
+
     if (keysPressed.ArrowRight && linvel.x < MAX_VEL) {
       impulse.x += MOVEMENT_SPEED;
       changeRotation = true;
+      if (actionsRef.current?.run) {
+        actionsRef.current.run.play();
+      }
+    } else {
+      if (actionsRef.current?.run) {
+        actionsRef.current.run.stop();
+      }
+    }
+
+    if (keysPressed.Space) {
+      if (actionsRef.current?.attack1) {
+        if (currentAction) {
+          currentAction.stop();
+        }
+        currentAction = actionsRef.current.attack1;
+        currentAction.play(); // Play attack1 animation
+      }
     }
     if (keysPressed.ArrowLeft && linvel.x > -MAX_VEL) {
       impulse.x -= MOVEMENT_SPEED;
@@ -86,7 +110,17 @@ const Controller = ({ playerRef }) => {
     };
   }, []);
 
-  return null;
+  return (
+    <group>
+      {/*
+        Wrap the Model component with Suspense to ensure the GLB model and animations are loaded properly.
+        Pass animations prop to Model component.
+      */}
+      <Suspense fallback={null}>
+        <Model animations={animations} actionsRef={actionsRef} />
+      </Suspense>
+    </group>
+  );
 };
 
 export default Controller;
