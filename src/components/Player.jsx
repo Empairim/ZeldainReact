@@ -27,7 +27,16 @@ const Player = () => {
       mixerRef.current.update(delta);
     }
   });
-
+  useEffect(() => {
+    mixerRef.current = new THREE.AnimationMixer(scene);
+    animations.forEach((clip) => {
+      const action = mixerRef.current.clipAction(clip);
+      actionsRef.current[clip.name] = action;
+      if (clip.name === "idle") {
+        action.play(); // Play the "idle" animation by default
+      }
+    });
+  }, [animations, scene]);
   const MAX_SPEED = 10;
   // animation and controls
   // animation and controls
@@ -104,9 +113,9 @@ const Player = () => {
         if (event.key === "l") {
           actionsRef.current["attack2"].fadeOut().stop();
         }
+        actionsRef.current["idle"].fadeIn().play(); // Play the "idle" animation when no keys are pressed
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
