@@ -4,14 +4,11 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls, Text } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
-import UseWorldAssets from "./components/UseWorldAssets";
 import World from "./components/World";
 import Player from "./components/Player";
 // import { PlayerProvider } from "./components/PlayerContext";
 
 const App = () => {
-  const { visuals, colliders } = UseWorldAssets("/glb/world0.glb");
-
   return (
     <div id="game">
       <Canvas shadows>
@@ -38,7 +35,7 @@ const App = () => {
           }
         >
           <Physics debug>
-            <World visuals={visuals} colliders={colliders} />
+            <World />
             <Player />
           </Physics>
         </Suspense>

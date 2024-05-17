@@ -1,124 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
-import { RigidBody } from "@react-three/rapier";
+import { RigidBody, euler, quat } from "@react-three/rapier";
 import * as THREE from "three";
 
 const Player = () => {
+  //const and refs for animation destrukturing
   const group = useRef();
   const { nodes, materials, animations } = useGLTF("/glb/character.glb");
-
-  const currentAction = useRef(null);
-  const [keysPressed, setKeysPressed] = useState({
-    ArrowRight: false,
-    ArrowLeft: false,
-    ArrowUp: false,
-    ArrowDown: false,
-    Space: false,
-  });
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      setKeysPressed((keys) => ({ ...keys, [event.key]: true }));
-    };
-
-    const handleKeyUp = (event) => {
-      setKeysPressed((keys) => ({ ...keys, [event.key]: false }));
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
-
-  // useFrame((state, delta) => {
-  //   if (mixer) {
-  //     const elapsedTime = state.clock.getElapsedTime();
-  //     mixer.update(elapsedTime);
-  //   }
-
-  //   if (!group.current) return;
-
-  //  const impulse = new THREE.Vector3();
-  //   const linvel = group.current.linvel();
-  //   const MOVEMENT_SPEED = 0.1;
-  //   const MAX_VEL = 1.75;
-  //   let changeRotation = false;
-
-  //   if (keysPressed["w"] && linvel.z < MAX_VEL) {
-  //     impulse.z += MOVEMENT_SPEED;
-  //     actions?.run.play();
-  //   }
-
-  //   if (keysPressed["s"] && linvel.z < MAX_VEL) {
-  //     impulse.z -= MOVEMENT_SPEED;
-  //     if (animations?.actions["run"]) {
-  //       currentAction.current = animations.actions["run"];
-  //       currentAction.current.play();
-  //     }
-  //   }
-
-  //   if (keysPressed["a"] && linvel.x < MAX_VEL) {
-  //     impulse.x -= MOVEMENT_SPEED;
-  //     // if (animations?.actions["straf"]) {
-  //     //   currentAction.current = animations.actions["straf"];
-  //     //   currentAction.current.play();
-  //     // }
-  //   }
-
-  //   if (keysPressed["d"] && linvel.x < MAX_VEL) {
-  //     impulse.x += MOVEMENT_SPEED;
-  //     if (animations?.actions["straf"]) {
-  //       currentAction.current = animations.actions["straf"];
-  //       currentAction.current.play();
-  //     }
-  //   }
-
-  //   if (keysPressed["Space"]) {
-  //     if (animations?.actions["jump"]) {
-  //       currentAction.current = animations.actions["jump"];
-  //       currentAction.current.play();
-  //     }
-  //   }
-
-  //   if (keysPressed["1"]) {
-  //     if (animations?.actions["attack1"]) {
-  //       currentAction.current = animations.actions["attack1"];
-  //       currentAction.current.play();
-  //     }
-  //   }
-
-  //   group.current.applyImpulse(impulse, true);
-
-  //   // Add your rotation logic here...
-
-  //   const targetPosition = group.current.translation();
-  //   const lerpFactor = 0.1;
-
-  //   camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
-  //   camera.position.y +=
-  //     (targetPosition.y + 3 - camera.position.y) * lerpFactor;
-  //   camera.position.z +=
-  //     (targetPosition.z + 6 - camera.position.z) * lerpFactor;
-
-  //   camera.lookAt(
-  //     new THREE.Vector3(
-  //       targetPosition.x,
-  //       targetPosition.y + 2,
-  //       targetPosition.z
-  //     )
-  //   );
-  // });
   const { scene, camera } = useThree();
   const mixerRef = useRef(null);
   const actionsRef = useRef({});
-  const groupRef = useRef(null); // Assuming group is a ref to your character's group
   const impulse = new THREE.Vector3();
-  const MOVEMENT_SPEED = 0.1;
+  const MOVEMENT_SPEED = 0.4;
 
   useEffect(() => {
     mixerRef.current = new THREE.AnimationMixer(scene);
@@ -134,60 +28,82 @@ const Player = () => {
     }
   });
 
+  const MAX_SPEED = 10;
+  // animation and controls
+  // animation and controls
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === "w" && actionsRef.current["run"]) {
-        impulse.z += MOVEMENT_SPEED;
-        actionsRef.current["run"].play();
-      }
-      if (event.key === "s" && actionsRef.current["run"]) {
-        impulse.z -= MOVEMENT_SPEED;
-        actionsRef.current["run"].play();
-      }
-      if (event.key === "a" && actionsRef.current["straf"]) {
-        impulse.x -= MOVEMENT_SPEED;
-        actionsRef.current["straf"].play();
-      }
-      if (event.key === "d" && actionsRef.current["straf"]) {
-        impulse.x += MOVEMENT_SPEED;
-        actionsRef.current["straf"].play();
-      }
-      if (event.key === " ") {
-        actionsRef.current["jump"].play();
-      }
-      if (event.key === "k") {
-        actionsRef.current["attack1"].play();
-      }
-      if (event.key === "l") {
-        actionsRef.current["attack2"].play();
+      if (group.current && actionsRef.current["run"]) {
+        const currentSpeed = 0;
+
+        if (currentSpeed < MAX_SPEED) {
+          // Only apply an impulse if the current speed is less than the maximum speed
+          if (event.key === "w") {
+            group.current.applyImpulse(
+              { x: 0, y: 0, z: -MOVEMENT_SPEED },
+              true
+            );
+            actionsRef.current["run"].fadeIn().play();
+            group.current.setRotation(quat({ x: 0, y: Math.PI, z: 0 }), true); // Snap rotation
+          }
+          if (event.key === "s") {
+            group.current.applyImpulse({ x: 0, y: 0, z: MOVEMENT_SPEED }, true);
+            actionsRef.current["run"].fadeIn().play();
+            group.current.setRotation(quat({ x: 0, y: 0, z: 0 }), true); // Face backward
+          }
+          if (event.key === "a") {
+            group.current.applyImpulse(
+              { x: -MOVEMENT_SPEED, y: 0, z: 0 },
+              true
+            );
+            actionsRef.current["run"].fadeIn().play();
+
+            group.current.setRotation(
+              quat({ x: 0, y: -Math.PI / 2, z: 0 }),
+              true
+            ); // Face left
+          }
+          if (event.key === "d") {
+            group.current.applyImpulse({ x: MOVEMENT_SPEED, y: 0, z: 0 }, true);
+            actionsRef.current["run"].fadeIn().play();
+
+            group.current.setRotation(
+              quat({ x: 0, y: Math.PI / 2, z: 0 }),
+              true
+            ); // Face right
+          }
+        }
+
+        if (event.key === " ") {
+          actionsRef.current["jump"].fadeIn().play();
+        }
+        if (event.key === "k") {
+          actionsRef.current["attack1"].fadeIn().play();
+        }
+        if (event.key === "l") {
+          actionsRef.current["attack2"].fadeIn().play();
+        }
       }
     };
-
     const handleKeyUp = (event) => {
-      if (event.key === "w" && actionsRef.current["run"]) {
-        impulse.z -= MOVEMENT_SPEED;
-        actionsRef.current["run"].stop();
-      }
-      if (event.key === "s" && actionsRef.current["run"]) {
-        impulse.z += MOVEMENT_SPEED;
-        actionsRef.current["run"].stop();
-      }
-      if (event.key === "a" && actionsRef.current["straf"]) {
-        impulse.x += MOVEMENT_SPEED;
-        actionsRef.current["straf"].stop();
-      }
-      if (event.key === "d" && actionsRef.current["straf"]) {
-        impulse.x -= MOVEMENT_SPEED;
-        actionsRef.current["straf"].stop();
-      }
-      if (event.key === " ") {
-        actionsRef.current["jump"].stop();
-      }
-      if (event.key === "k") {
-        actionsRef.current["attack1"].stop();
-      }
-      if (event.key === "l") {
-        actionsRef.current["attack2"].stop();
+      if (group.current && actionsRef.current["run"]) {
+        if (event.key === "w" || event.key === "s") {
+          group.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          actionsRef.current["run"].fadeOut().stop();
+        }
+        if (event.key === "a" || event.key === "d") {
+          group.current.setLinvel({ x: 0, y: 0, z: 0 }, true);
+          actionsRef.current["run"].fadeOut().stop();
+        }
+        if (event.key === " ") {
+          actionsRef.current["jump"].fadeOut().stop();
+        }
+        if (event.key === "k") {
+          actionsRef.current["attack1"].fadeOut().stop();
+        }
+        if (event.key === "l") {
+          actionsRef.current["attack2"].fadeOut().stop();
+        }
       }
     };
 
@@ -198,12 +114,13 @@ const Player = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
-
+  });
+  //////
+  //camera follow
   useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.applyImpulse(impulse, true);
-      const targetPosition = groupRef.current.translation();
+    if (group.current) {
+      group.current.applyImpulse(impulse, true);
+      const targetPosition = group.current.translation();
       const lerpFactor = 0.1;
 
       camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
@@ -215,14 +132,22 @@ const Player = () => {
       camera.lookAt(
         new THREE.Vector3(
           targetPosition.x,
-          targetPosition.y + 2,
+          targetPosition.y + 3,
           targetPosition.z
         )
       );
     }
   });
+  ////
+  //rigid body
   return (
-    <RigidBody ref={group}>
+    <RigidBody
+      ref={group}
+      type="Dynamic"
+      enabledRotations={[false, true, false]}
+      colliders={"cuboid"}
+      setRotation={euler(0, 0, 0)}
+    >
       <group name="Scene">
         <group name="ArmatureCharacter">
           <skinnedMesh
