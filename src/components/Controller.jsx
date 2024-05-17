@@ -1,126 +1,202 @@
-/* eslint-disable react/prop-types */
-import { useThree, useFrame, extend } from "@react-three/fiber";
-import { useState, useEffect, useRef, Suspense } from "react";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { useGLTF, useAnimations } from "@react-three/drei"; // Import useGLTF and useAnimations hooks
-import * as THREE from "three";
-import { Model } from "./Char";
+// import { useEffect, useRef, useState } from "react";
+// import { useThree, useFrame } from "@react-three/fiber";
+// import { usePlayer } from "./PlayerContext";
+// import * as THREE from "three";
 
-extend({ OrbitControls });
+// const Controller = ({ playerRef }) => {
+//   const { camera } = useThree();
+//   const { animations } = usePlayer();
+//   const [keysPressed, setKeysPressed] = useState({
+//     ArrowRight: false,
+//     ArrowLeft: false,
+//     ArrowUp: false,
+//     ArrowDown: false,
+//     Space: false,
+//   });
+//   const currentAction = useRef(null);
+//   const mixer = useRef(null);
+
+//   useEffect(() => {
+//     if (animations && animations.actions) {
+//       mixer.current = animations.mixer;
+//       console.log("Animations loaded:", animations.names);
+//     }
+//   }, [animations]);
+
+//   useEffect(() => {
+//     const handleKeyDown = (event) => {
+//       setKeysPressed((keys) => ({ ...keys, [event.key]: true }));
+//     };
+
+//     const handleKeyUp = (event) => {
+//       setKeysPressed((keys) => ({ ...keys, [event.key]: false }));
+//     };
+
+//     window.addEventListener("keydown", handleKeyDown);
+//     window.addEventListener("keyup", handleKeyUp);
+
+//     return () => {
+//       window.removeEventListener("keydown", handleKeyDown);
+//       window.removeEventListener("keyup", handleKeyUp);
+//     };
+//   }, []);
+
+//   useFrame((state, delta) => {
+//     if (mixer.current) {
+//       mixer.current.update(delta);
+//     }
+
+//     if (!playerRef.current) return;
+
+//     const impulse = new THREE.Vector3();
+//     const linvel = playerRef.current.linvel();
+//     const MOVEMENT_SPEED = 0.1;
+//     const MAX_VEL = 1.75;
+//     let changeRotation = false;
+
+//     if (keysPressed.ArrowRight && linvel.x < MAX_VEL) {
+//       impulse.x += MOVEMENT_SPEED;
+//       changeRotation = true;
+//       if (animations?.actions["run_shield"]) {
+//         if (currentAction.current !== animations.actions["run_shield"]) {
+//           if (currentAction.current) {
+//             currentAction.current.fadeOut(0.5);
+//           }
+//           currentAction.current = animations.actions["run_shield"];
+//           currentAction.current.reset().fadeIn(0.5).play();
+//           console.log("Playing run_shield animation");
+//         }
+//       }
+//     }
+//     if (keysPressed.ArrowLeft && linvel.x > -MAX_VEL) {
+//       impulse.x -= MOVEMENT_SPEED;
+//       changeRotation = true;
+//       if (animations?.actions["run"]) {
+//         if (currentAction.current !== animations.actions["run"]) {
+//           if (currentAction.current) {
+//             currentAction.current.fadeOut(0.5);
+//           }
+//           currentAction.current = animations.actions["run"];
+//           currentAction.current.reset().fadeIn(0.5).play();
+//           console.log("Playing run animation");
+//         }
+//       }
+//     }
+//     if (keysPressed.ArrowDown && linvel.z < MAX_VEL) {
+//       impulse.z += MOVEMENT_SPEED;
+//       changeRotation = true;
+//       if (animations?.actions["run"]) {
+//         if (currentAction.current) {
+//           currentAction.current.fadeOut(0.5);
+//         }
+//         currentAction.current = animations.actions["run"];
+//         currentAction.current.reset().fadeIn(0.5).play();
+//         console.log("Playing run animation");
+//       }
+//     }
+//     if (keysPressed.ArrowUp && linvel.z > -MAX_VEL) {
+//       impulse.z -= MOVEMENT_SPEED;
+//       changeRotation = true;
+//       if (animations?.actions["run"]) {
+//         if (currentAction.current) {
+//           currentAction.current.fadeOut(0.5);
+//         }
+//         currentAction.current = animations.actions["run"];
+//         currentAction.current.reset().fadeIn(0.5).play();
+//         console.log("Playing run animation");
+//       }
+//     }
+
+//     playerRef.current.applyImpulse(impulse, true);
+
+//     if (changeRotation) {
+//       if (impulse.x !== 0 || impulse.z !== 0) {
+//         const angle = Math.atan2(-impulse.z, impulse.x);
+//         playerRef.current.setRotation(
+//           new THREE.Quaternion().setFromAxisAngle(
+//             new THREE.Vector3(0, 1, 0),
+//             angle
+//           )
+//         );
+//       }
+//     }
+
+//     if (
+//       !changeRotation &&
+//       currentAction.current === animations.actions["run"]
+//     ) {
+//       currentAction.current.fadeOut(0.5);
+//       currentAction.current = null;
+//       console.log("Stopping run animation");
+//     }
+
+//     const targetPosition = playerRef.current.translation();
+//     const lerpFactor = 0.1;
+
+//     camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
+//     camera.position.y +=
+//       (targetPosition.y + 3 - camera.position.y) * lerpFactor;
+//     camera.position.z +=
+//       (targetPosition.z + 6 - camera.position.z) * lerpFactor;
+
+//     camera.lookAt(
+//       new THREE.Vector3(
+//         targetPosition.x,
+//         targetPosition.y + 2,
+//         targetPosition.z
+//       )
+//     );
+//   });
+
+//   return null;
+// };
+
+// export default Controller;
+import { useEffect, useRef, useState } from "react";
+import { useThree, useFrame } from "@react-three/fiber";
+import { usePlayer } from "./PlayerContext";
+import * as THREE from "three";
 
 const Controller = ({ playerRef }) => {
   const { camera } = useThree();
-  const [keysPressed, setKeysPressed] = useState({
-    ArrowRight: false,
-    ArrowLeft: false,
-    ArrowUp: false,
-    ArrowDown: false,
-    Space: false, // Add Space key
-  });
+  const { animations } = usePlayer();
+  const currentAction = useRef(null);
+  const mixer = useRef(null);
+  console.log("animations", animations);
 
-  const { animations } = useGLTF("/glb/character.glb"); // Load GLB animations
-  const actionsRef = useRef();
-  const MOVEMENT_SPEED = 0.1;
-  const MAX_VEL = 1.75;
-  let currentAction = null;
-
-  //Camera follows the player
-  useFrame(() => {
-    if (!playerRef.current) return;
-
-    const targetPosition = playerRef.current.translation();
-    const lerpFactor = 0.01;
-    // Interpolate the camera's position towards the target position
-    camera.position.x += (targetPosition.x - camera.position.x) * lerpFactor;
-    camera.position.y +=
-      (targetPosition.y + 5.4 - camera.position.y) * lerpFactor;
-    camera.position.z +=
-      (targetPosition.z + 9 - camera.position.z) * lerpFactor;
-    // Create a quaternion representing the rotation from the camera to the target position
-    const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(
-      new THREE.Matrix4().lookAt(camera.position, targetPosition, camera.up)
-    );
-
-    // Interpolate the camera's quaternion towards the target quaternion
-    camera.quaternion.slerp(targetQuaternion, lerpFactor);
-
-    const impulse = { x: 0, y: 0, z: 0 };
-    const linvel = playerRef.current.linvel();
-    let changeRotation = false;
-    //Player movement
-
-    if (keysPressed.ArrowRight && linvel.x < MAX_VEL) {
-      impulse.x += MOVEMENT_SPEED;
-      changeRotation = true;
-      if (actionsRef.current?.run) {
-        actionsRef.current.run.play();
-      }
-    } else {
-      if (actionsRef.current?.run) {
-        actionsRef.current.run.stop();
-      }
-    }
-
-    if (keysPressed.Space) {
-      if (actionsRef.current?.attack1) {
-        if (currentAction) {
-          currentAction.stop();
-        }
-        currentAction = actionsRef.current.attack1;
-        currentAction.play(); // Play attack1 animation
-      }
-    }
-    if (keysPressed.ArrowLeft && linvel.x > -MAX_VEL) {
-      impulse.x -= MOVEMENT_SPEED;
-      changeRotation = true;
-    }
-    if (keysPressed.ArrowDown && linvel.z < MAX_VEL) {
-      impulse.z += MOVEMENT_SPEED;
-      changeRotation = true;
-    }
-    if (keysPressed.ArrowUp && linvel.z > -MAX_VEL) {
-      impulse.z -= MOVEMENT_SPEED;
-      changeRotation = true;
-    }
-
-    playerRef.current.applyImpulse(impulse, true);
-    if (changeRotation) {
-      if (impulse.x !== 0 || impulse.z !== 0) {
-        const angle = Math.atan2(-impulse.z, impulse.x);
-        playerRef.current.rotation.y = angle;
-      }
-    }
-  });
-  //Key press event
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      setKeysPressed((keys) => ({ ...keys, [event.key]: true }));
+    if (animations && animations.actions) {
+      mixer.current = animations.mixer;
+      console.log("Animations loaded:", animations.names);
+    }
+  }, [animations]);
+
+  useEffect(() => {
+    const handleClick = () => {
+      if (animations?.actions["run"]) {
+        if (currentAction.current) {
+          currentAction.current.fadeOut(0.5);
+        }
+        currentAction.current = animations.actions["run"];
+        currentAction.current.reset().fadeIn(0.5).play();
+        console.log("Playing run animation");
+      }
     };
 
-    const handleKeyUp = (event) => {
-      setKeysPressed((keys) => ({ ...keys, [event.key]: false }));
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("click", handleClick);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("click", handleClick);
     };
-  }, []);
+  }, [animations]);
 
-  return (
-    <group>
-      {/*
-        Wrap the Model component with Suspense to ensure the GLB model and animations are loaded properly.
-        Pass animations prop to Model component.
-      */}
-      <Suspense fallback={null}>
-        <Model animations={animations} actionsRef={actionsRef} />
-      </Suspense>
-    </group>
-  );
+  useFrame((state, delta) => {
+    if (mixer.current) {
+      mixer.current.update(delta);
+    }
+  });
+
+  return null;
 };
 
 export default Controller;

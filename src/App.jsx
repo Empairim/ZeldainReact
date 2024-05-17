@@ -7,6 +7,7 @@ import { Physics } from "@react-three/rapier";
 import UseWorldAssets from "./components/UseWorldAssets";
 import World from "./components/World";
 import Player from "./components/Player";
+// import { PlayerProvider } from "./components/PlayerContext";
 
 const App = () => {
   const { visuals, colliders } = UseWorldAssets("/glb/world0.glb");
@@ -27,7 +28,7 @@ const App = () => {
           shadow-camera-far={50}
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
-          shadow-bias={-0.0001} // reduces self-shadowing
+          shadow-bias={-0.0001}
         />
         <Suspense
           fallback={
